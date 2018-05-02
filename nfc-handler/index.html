@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>Futuristic Display System v2000</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        border: 0;
+      }
+
+      html, body {
+        height: 100%;
+        overflow: hidden;
+      }
+
+      iframe {
+        width: 100%;
+        height: 100%;
+        position: absolute;
+      }
+
+      #screen {
+        background: green;
+        opacity: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <iframe id="dust" src="http://startiot.cs.uit.no/dust"></iframe>
+    <iframe id="screen"></iframe>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.0/socket.io.js"></script>
+    <script>
+      var socket = io('http://localhost:3022');
+      
+      socket.on('broadcast', function (data) {
+        var cid = data.cid;
+        document.getElementById('dust').style.opacity = '0'
+        document.getElementById('screen').style.opacity = '1'
+
+        window.setTimeout(function () {
+          document.getElementById('dust').style.opacity = '1'
+          document.getElementById('screen').style.opacity = '0'
+        }, 30000)
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,15 @@
+{
+  "name": "nfc-handler",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "nfc-pcsc": "^0.6.2",
+    "socket.io": "^2.1.0"
+  }
+}
