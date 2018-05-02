@@ -1,0 +1,26 @@
+{
+  "name": "api",
+  "version": "0.0.1",
+  "description": "API",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node --experimental-modules index.mjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Pwntus/futuristic-display-system-2000.git"
+  },
+  "author": "Pontus Aurdal <pontus.edvard@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Pwntus/futuristic-display-system-2000/issues"
+  },
+  "homepage": "https://github.com/Pwntus/futuristic-display-system-2000#readme",
+  "dependencies": {
+    "axios": "^0.18.0",
+    "bluebird": "^3.5.1",
+    "express": "^4.16.3",
+    "sqlite": "^2.9.1"
+  }
+}
