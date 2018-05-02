@@ -13,7 +13,14 @@ app.use(express.json())
 app.use(async (req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*')
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept')
-  next()
+  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE')
+
+  // Intercept OPTIONS method
+  if ('OPTIONS' == req.method) {
+    res.status(200).send()
+  } else {
+    next()
+  }
 })
 
 // API middleware
@@ -26,6 +33,26 @@ app.use('/:cid([0-9]{10})', async (req, res, next) => {
       await db.run('INSERT INTO User (cid) VALUES (?)', req.params.cid)
 
     next()
+  } catch (err) {
+    next(err)
+  }
+})
+
+// Delete subject
+app.delete('/:cid([0-9]{10})/:id', async (req, res, next) => {
+  try {
+    await db.run(`
+      DELETE FROM Subject
+      WHERE uid IN (
+        SELECT s.uid
+        FROM Subject s
+        INNER JOIN User u
+          ON u.id = s.uid
+        WHERE u.cid = ?
+      )
+      AND id = ?
+    `, req.params.cid, req.params.id)
+    res.status(200).send()
   } catch (err) {
     next(err)
   }
@@ -63,31 +90,6 @@ app.route('/:cid([0-9]{10})')
         FROM User
         WHERE cid = ?
       `, req.body.label, req.params.cid)
-      res.status(200).send()
-    } catch (err) {
-      next(err)
-    }
-  })
-
-  // Delete subject
-  .delete(async (req, res, next) => {
-    try {
-      if (!req.body.hasOwnProperty('id')) {
-        next('ID required')
-        return
-      }
-
-      await db.run(`
-        DELETE FROM Subject
-        WHERE uid IN (
-          SELECT s.uid
-          FROM Subject s
-          INNER JOIN User u
-            ON u.id = s.uid
-          WHERE u.cid = ?
-        )
-        AND id = ?
-      `, req.params.cid, req.body.id)
       res.status(200).send()
     } catch (err) {
       next(err)

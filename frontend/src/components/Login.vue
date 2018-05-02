@@ -26,6 +26,7 @@ export default {
     submit () {
       // TODO: assert correct format
       this.$store.commit('setCid', this.cid)
+      this.$store.dispatch('getSubjects')
     }
   }
 }
