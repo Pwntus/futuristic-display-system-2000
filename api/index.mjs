@@ -2,6 +2,8 @@ import express from 'express'
 import db from 'sqlite'
 import Promise from 'bluebird'
 import axios from 'axios'
+import currentWeekNumber from 'current-week-number'
+import ical from 'node-ical'
 
 const app = express()
 const port = process.env.PORT || 3002
@@ -38,6 +40,60 @@ app.use('/:cid([0-9]{10})', async (req, res, next) => {
   }
 })
 
+// Term search (not required, using static data)
+/*
+app.get('/search/:term', async (req, res, next) => {
+  try {
+    const response = await axios.get(`http://timeplan.uit.no/emne_search.php?year=2018&term=${req.params.term}`)
+    const output = response.data.reduce((a, b) => {
+      a.push(b.id)
+      return a
+    }, [])
+    res.status(200).send(output)
+  } catch (err) {
+    next(err)
+  }
+})
+*/
+
+// Screen data
+app.get('/:cid([0-9]{10})/screen', async (req, res, next) => {
+  try {
+    const subjects = await db.all(`
+      SELECT s.id, s.label
+      FROM Subject s
+      INNER JOIN User u
+        ON u.id = s.uid
+      WHERE u.cid = ?
+    `, req.params.cid)
+    if (subjects.length <= 0)
+      res.status(200).send(null)
+
+    // Construct ICS params
+    const module = subjects.reduce((a, b) => {
+      a.push(b.label.split(' ')[0])
+      return a
+    }, [])
+    const year = (new Date()).getFullYear()
+    const week = currentWeekNumber()
+
+    // Get ICS
+    const response = await axios.get('http://timeplan.uit.no/calendar.ics', {
+      params: { module, year, week }
+    })
+
+    // Parse ICS
+    ical.parseICS(response.data, (err, data) => {
+      if (err)
+        next(err)
+      
+      res.status(200).send(data)
+    })
+  } catch (err) {
+    next(err)
+  }
+})
+
 // Delete subject
 app.delete('/:cid([0-9]{10})/:id', async (req, res, next) => {
   try {
@@ -58,6 +114,7 @@ app.delete('/:cid([0-9]{10})/:id', async (req, res, next) => {
   }
 })
 
+// API ops
 app.route('/:cid([0-9]{10})')
   
   // Fetch subject list
@@ -100,19 +157,6 @@ app.route('/:cid([0-9]{10})')
   .put(async (req, res, next) => {
     res.status(200).send()
   })
-
-app.get('/search/:term', async (req, res, next) => {
-  try {
-    const response = await axios.get(`http://timeplan.uit.no/emne_search.php?year=2018&term=${req.params.term}`)
-    const output = response.data.reduce((a, b) => {
-      a.push(b.id)
-      return a
-    }, [])
-    res.status(200).send(output)
-  } catch (err) {
-    next(err)
-  }
-})
 
 // Error
 app.use(async (err, req, res, next) => {

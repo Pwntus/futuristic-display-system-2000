@@ -1,46 +1,29 @@
 <template lang="pug">
 #app
-  login
-  dashboard
+  router-view
 </template>
 
 <script>
-import Login from '@/components/Login'
-import Dashboard from '@/components/Dashboard'
-
 export default {
-  name: 'App',
-  components: {
-    Login,
-    Dashboard
-  },
-  computed: {
-    subjects () {
-      //await this.$store.dispatch('getSubjects', '0123456789')
-      return this.$store.getters.subjects
-    }
-  },
-  mounted () {
-    //this.$store.dispatch('getSubjects', '0123456789')
-  }
+  name: 'App'
 }
 </script>
 
 <style lang="scss">
 @import "~vue-material/dist/theme/engine";
-@include md-register-theme("default", (
-  primary: md-get-palette-color(cyan, 700),
-  theme: dark
-));
-@import "~vue-material/dist/theme/all";
-
-body {
+body, #app {
   height: 100%;
 }
 
-#app {
+body:after {
+  content: "";
+  display: block;
+  background-attachment: fixed;
+  position: fixed;
+  top: 0; left: 0;
   height: 100%;
-  padding: 15px;
+  width: 100%;
   background: md-get-palette-color(cyan, 700);
+  z-index:-1;   
 }
 </style>

@@ -5,7 +5,6 @@
       v-for="(item, index) in $store.getters.subjects"
       :key="index"
     )
-      //md-icon move_to_inbox
       span.md-list-item-text {{ item.label }}
       md-button.md-icon-button.md-list-action(@click="remove(item.id)")
         md-icon clear

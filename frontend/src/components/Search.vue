@@ -2,12 +2,21 @@
 #search
   md-autocomplete.md-primary(
     v-model="selected"
-    :md-options="courses"
-    @md-changed="getCourses"
-    @md-opened="getCourses"
+    :md-options="subjects"
+    :md-fuzzy-search="false"
+    @md-changed="filterSubjects"
     md-layout="box"
   )
     label Search Courses
+
+    template(
+      slot="md-autocomplete-item"
+      slot-scope="{ item, term }"
+    )
+      md-highlight-text(
+        :md-term="term"
+        :md-fuzzy-search="false"
+      ) {{ item }}
 
   md-button.md-raised.add(
     v-if="selected"
@@ -16,31 +25,15 @@
 </template>
 
 <script>
-import axios from 'axios'
+import subjects from '@/assets/subjects'
 import _ from 'lodash'
 
 export default {
   name: 'Search',
   data: () => ({
     selected: null,
-    courses: [],
-    getCourses: null
+    subjects: []
   }),
-  created () {
-    this.getCourses = _.debounce(searchTerm => {
-      if (!searchTerm)
-        return
-
-      const term = searchTerm.toLowerCase()
-      axios.get(`http://localhost:3002/search/${term}`)
-        .then(res => {
-          this.courses = res.data
-        })
-        .catch(err => {
-          console.error(err)
-        })
-    }, 1000)
-  },
   methods: {
     async add () {
       let subject = this.selected
@@ -50,6 +43,14 @@ export default {
       if (status !== 200)
         console.error('Failed to add subject')
     }
+  },
+  created () {
+    this.filterSubjects = _.debounce(term => {
+      if (!term || term.length < 2)
+        return
+
+      this.subjects = subjects.filter(s => s.toLowerCase().includes(term))
+    }, 500)
   }
 }
 </script>
@@ -60,6 +61,10 @@ export default {
   theme: light
 ));
 @import "~vue-material/dist/theme/all";
+
+.md-highlight-text-match {
+  color: md-get-palette-color(cyan, 700) !important;
+}
 
 #search {
   margin-bottom: 20px;
