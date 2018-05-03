@@ -10,7 +10,7 @@
     v-if="done && curated.length <= 0"
     md-icon="sentiment_dissatisfied"
     md-label="No Data"
-    md-description="Pleaso go to http://localhost:8080 and add courses to your card."
+    md-description="Please visit http://localhost:8080 and add courses to your card."
   )
   today.today(
     :class="{ 'show' : done && curated.length > 0 }"
@@ -90,6 +90,10 @@ export default {
   }
 
   .md-empty-state {
+    top: 50%;
+    left: 50%;
+    margin: -140px 0 0 -210px;
+    position: absolute;
     color: #FFF;
   }
 
