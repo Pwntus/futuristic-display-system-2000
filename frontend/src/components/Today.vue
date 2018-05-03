@@ -4,12 +4,12 @@
   .md-layout-item.md-size-100
     span.md-display-1 Today's Agenda
 
-  .md-layout-item.md-xsmall-size-100.md-small-size-50.md-medium-size-33.md-large-size-25.md-xlarge-size-20.events-layout
+  .md-layout-item.md-size-25.md-xsmall-size-100.md-small-size-50.md-medium-size-33.md-large-size-25.md-xlarge-size-20.events-layout
     md-card(
       v-for="(item, index) in curatedData"
       :key="index"
       :class="{ 'md-accent': item.uid == upcoming.uid }"
-      :md-theme="[item.uid == upcoming.uid ? 'default' : 'card-light']"
+      :md-theme="[item.uid == upcoming.uid ? 'card-light' : 'card-dark']"
     )
       md-card-area(md-inset)
         md-card-header
@@ -17,13 +17,13 @@
           .md-subhead
             md-icon location_on
             span {{ item.location }}
-        md-card-content(v-if="item.uid == upcoming.uid") Upcoming class! Starts {{ moment(item.start).fromNow() }}.
+        md-card-content(v-if="item.uid == upcoming.uid") {{ displayText(item.start) }}
       md-card-content
         .card-time
           md-icon access_time
           span {{ moment(item.start).format('HH:mm') }} - {{ moment(item.end).format('HH:mm') }}
 
-  .md-layout-item.md-xsmall-size-100.md-small-size-50.md-medium-size-66.md-large-size-75.md-xlarge-size-80.mazemap-layout(:class="{ 'hidden' : !displayMap }")
+  .md-layout-item.md-size-75.md-xsmall-size-100.md-small-size-50.md-medium-size-66.md-large-size-75.md-xlarge-size-80.mazemap-layout(:class="{ 'hidden' : !displayMap }")
     .mazemap(ref="map")
 </template>
 
@@ -51,17 +51,16 @@ export default {
 
       let now = moment()
       let closest = null
-      let closestItem = null
+      let closestItem = { uid: null }
 
       for (let i in this.curatedData) {
         let item = this.curatedData[i]
 
-        if (closest == null)
-          closest = moment(item.start)
-
-        if (moment(item.start).isAfter(now) && moment(item.start).isSameOrBefore(closest)) {
-          closest = moment(item.start)
-          closestItem = item
+        if (moment(item.end).isAfter(now)) {
+          if (closest == null || moment(item.end).isSameOrBefore(closest)) {
+            closest = moment(item.end)
+            closestItem = item
+          }
         }
       }
 
@@ -95,6 +94,13 @@ export default {
   methods: {
     moment (p) {
       return moment(p)
+    },
+    displayText (start) {
+      if (moment().isAfter(start)) {
+        return `Currently ongoing. Started ${moment(start).fromNow()}.`
+      } else {
+        return `Upcoming. Starts ${moment(start).fromNow()}.`
+      }
     }
   },
   mounted () {
@@ -124,6 +130,9 @@ export default {
 @include md-register-theme("default", (
   theme: dark
 ));
+@include md-register-theme("card-dark", (
+  theme: dark
+));
 @include md-register-theme("card-light", (
   theme: light
 ));
@@ -140,9 +149,15 @@ export default {
   .md-card {
     margin-bottom: 15px;
     vertical-align: top;
+    background: #26C6DA;
 
     &.md-accent {
-      background: #26C6DA;
+      background: #FFF;
+      color: #000;
+
+      .md-card-content {
+        padding-top: 0;
+      }
     }
 
     .md-subhead {

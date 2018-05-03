@@ -1,6 +1,21 @@
 <template lang="pug">
 #view-screen
-  today(:curated-data="curated")
+  md-progress-spinner.md-accent(
+    v-if="!done"
+    md-mode="indeterminate"
+    :md-diameter="80"
+    :md-stroke="5"
+  )
+  md-empty-state(
+    v-if="done && curated.length <= 0"
+    md-icon="sentiment_dissatisfied"
+    md-label="No Data"
+    md-description="Pleaso go to http://localhost:8080 and add courses to your card."
+  )
+  today.today(
+    :class="{ 'show' : done && curated.length > 0 }"
+    :curated-data="curated"
+  )
 </template>
 
 <script>
@@ -13,7 +28,7 @@ export default {
   components: { Today },
   data: () => ({
     ics: null,
-    err: false
+    done: false
   }),
   computed: {
     curated () {
@@ -41,9 +56,10 @@ export default {
     axios.get(`http://localhost:3002/${this.$route.params.cid}/screen`)
       .then(res => {
         this.ics = res.data
+        this.done = true
       })
       .catch(err => {
-        this.err = true
+        this.done = true
       })
   }
 }
@@ -52,7 +68,8 @@ export default {
 <style lang="scss">
 @import "~vue-material/dist/theme/engine";
 @include md-register-theme("default", (
-  primary: md-get-palette-color(white, 700),
+  primary: md-get-palette-color(white, 500),
+  accent: md-get-palette-color(white, 500),
   theme: light
 ));
 @import "~vue-material/dist/theme/all";
@@ -60,5 +77,28 @@ export default {
 #view-screen {
   height: 100%;
   padding: 15px;
+
+  .md-progress-spinner {
+    top: 50%;
+    left: 50%;
+    margin: -40px 0 0 -40px;
+    position: absolute;
+
+    .md-progress-spinner-circle {
+      stroke: #FFF;
+    }
+  }
+
+  .md-empty-state {
+    color: #FFF;
+  }
+
+  .today {
+    visibility: hidden;
+
+    &.show {
+      visibility: visible;
+    }
+  }
 }
 </style>

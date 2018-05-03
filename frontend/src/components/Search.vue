@@ -18,10 +18,10 @@
         :md-fuzzy-search="false"
       ) {{ item }}
 
-  md-button.md-raised.add(
+  md-button.add(
     v-if="selected"
     @click="add"
-  ) Add
+  ) Add to list
 </template>
 
 <script>
@@ -72,7 +72,6 @@ export default {
   .add {
     margin: 0;
     width: 100%;
-    background: #26C6DA;
     color: #FFF;
   }
 }
