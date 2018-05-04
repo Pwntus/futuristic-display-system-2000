@@ -23,15 +23,16 @@
           md-icon access_time
           span {{ moment(item.start).format('HH:mm') }} - {{ moment(item.end).format('HH:mm') }}
 
-  .md-layout-item.md-size-75.md-xsmall-size-100.md-small-size-50.md-medium-size-66.md-large-size-75.md-xlarge-size-80.mazemap-layout(:class="{ 'hidden' : !displayMap }")
+  .md-layout-item.md-size-75.md-xsmall-size-100.md-small-size-50.md-medium-size-66.md-large-size-75.md-xlarge-size-80.mazemap-layout.md-elevation-3(:class="{ 'hidden' : !displayMap }")
     .mazemap(ref="map")
 </template>
 
 <script>
+import axios from 'axios'
 import moment from 'moment'
 
 const CAMPUS_ID    = 5
-const START_POI    = { poiId: 174582 }
+const START_POI    = { poiId: 175573 }
 const CENTER       = { lng: 18.977056, lat: 69.681613 }
 const DEFAULT_ZOOM = 18
 
@@ -40,7 +41,6 @@ export default {
   props: ['curatedData'],
   data: () => ({
     map: null,
-    search: null,
     routeController: null,
     displayMap: false
   }),
@@ -68,13 +68,32 @@ export default {
     }
   },
   watch: {
-    upcoming: function (item) {
+    upcoming: function (val) {
+      if (val.hasOwnProperty('location'))
+        this.findRoute(val.location)
+    }
+  },
+  methods: {
+    moment (p) {
+      return moment(p)
+    },
+    findRoute (location) {
       try {
-        const searchTerm = item.location.replace('.', '')
+        const searchTerm = encodeURIComponent(location)
 
-        this.search.search(searchTerm)
+        axios.get(`https://uit.no/studenter/app/mazemapjson?syllabus_name=${searchTerm}`)
+          .then(res => res.data)
           .then(res => {
-            const dest = { poiId: res.results[0].poiId }
+            if (res.success !== 'true')
+              return
+
+            const dest = {
+              lngLat: {
+                lng: res.mazemap_lon,
+                lat: res.mazemap_lat
+              },
+              zLevel: res.mazemap_z_index
+            }
 
             Mazemap.Data.getRouteJSON(START_POI, dest)
               .then(geojson => {
@@ -83,17 +102,12 @@ export default {
 
                 // Fit the map bounds to the path bounding box
                 let bounds = Mazemap.Util.Turf.bbox(geojson)
-                this.map.fitBounds(bounds, { padding: 10 })
+                this.map.fitBounds(bounds, { padding: 50 })
               })
           })
       } catch (err) {
-
+        console.error(err)
       }
-    }
-  },
-  methods: {
-    moment (p) {
-      return moment(p)
     },
     displayText (start) {
       if (moment().isAfter(start)) {
@@ -110,10 +124,6 @@ export default {
       center:        CENTER,
       zoom:          DEFAULT_ZOOM,
       zLevelControl: false
-    })
-    this.search = new Mazemap.Search.SearchController({
-      campusid: CAMPUS_ID,
-      rows: 1
     })
     this.map.on('load', () => {
       this.routeController = new Mazemap.RouteController(this.map, {
@@ -205,6 +215,7 @@ export default {
     .mazemap {
       width: 100%;
       height: 100%;
+      border-radius: 3px;
     }
   }
 }
