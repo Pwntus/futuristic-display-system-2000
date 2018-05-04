@@ -23,8 +23,17 @@
           md-icon access_time
           span {{ moment(item.start).format('HH:mm') }} - {{ moment(item.end).format('HH:mm') }}
 
-  .md-layout-item.md-size-75.md-xsmall-size-100.md-small-size-50.md-medium-size-66.md-large-size-75.md-xlarge-size-80.mazemap-layout.md-elevation-3(:class="{ 'hidden' : !displayMap }")
-    .mazemap(ref="map")
+  .md-layout-item.md-size-75.md-xsmall-size-100.md-small-size-50.md-medium-size-66.md-large-size-75.md-xlarge-size-80.mazemap-layout
+    .mazemap.md-elevation-3(
+      ref="map"
+      :class="{ 'hidden' : !displayMap }"
+    )
+    md-empty-state(
+      v-if="empty"
+      md-icon="mood"
+      md-label="No Upcoming Events"
+      md-description="Looks like you are done for today!"
+    )
 </template>
 
 <script>
@@ -46,7 +55,8 @@ export default {
     map: null,
     routeController: null,
     displayMap: false,
-    animateMap: null
+    animateMap: null,
+    empty: false
   }),
   computed: {
     upcoming () {
@@ -73,8 +83,11 @@ export default {
   },
   watch: {
     upcoming: function (val) {
-      if (val.hasOwnProperty('location'))
+      if (val.hasOwnProperty('location')) {
         this.findRoute(val.location)
+      } else {
+        this.empty = true
+      }
     }
   },
   methods: {
@@ -251,14 +264,21 @@ export default {
     height: calc(100% - 85px);
     position: relative;
 
-    &.hidden {
-      opacity: 0;
-    }
-
     .mazemap {
       width: 100%;
       height: 100%;
       border-radius: 3px;
+
+      &.hidden {
+        opacity: 0;
+      }
+    }
+
+    .md-empty-state {
+      top: 0;
+      left: 0;
+      margin: 0 auto;
+      position: relative;
     }
   }
 }
