@@ -1,11 +1,12 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import axios from 'axios'
+import { API_BASE } from '@/config'
 
 Vue.use(Vuex)
 
 let api = axios.create({
-  baseURL: 'http://localhost:3002/',
+  baseURL: API_BASE,
   responseType: 'json'
 })
 

@@ -22,6 +22,7 @@
 import axios from 'axios'
 import moment from 'moment'
 import Today from '@/components/Today'
+import { API_BASE } from '@/config'
 
 export default {
   name: 'ViewScreen',
@@ -53,7 +54,7 @@ export default {
     }
   },
   mounted () {
-    axios.get(`http://localhost:3002/${this.$route.params.cid}/screen`)
+    axios.get(`${API_BASE + this.$route.params.cid}/screen`)
       .then(res => {
         this.ics = res.data
         this.done = true

@@ -30,11 +30,14 @@
 <script>
 import axios from 'axios'
 import moment from 'moment'
-
-const CAMPUS_ID    = 5
-const START_POI    = { poiId: 175573 }
-const CENTER       = { lng: 18.977056, lat: 69.681613 }
-const DEFAULT_ZOOM = 18
+import {
+  NAME2POI_BASE,
+  MM_CAMPUS_ID,
+  MM_START_POI,
+  MM_CENTER_LNGLAT,
+  MM_ZOOM,
+  MM_ZLVL
+} from '@/config'
 
 export default {
   name: 'Today',
@@ -42,7 +45,8 @@ export default {
   data: () => ({
     map: null,
     routeController: null,
-    displayMap: false
+    displayMap: false,
+    animateMap: null
   }),
   computed: {
     upcoming () {
@@ -81,12 +85,13 @@ export default {
       try {
         const searchTerm = encodeURIComponent(location)
 
-        axios.get(`https://uit.no/studenter/app/mazemapjson?syllabus_name=${searchTerm}`)
+        axios.get(NAME2POI_BASE + searchTerm)
           .then(res => res.data)
           .then(res => {
             if (res.success !== 'true')
               return
 
+            const start = { poiId: MM_START_POI }
             const dest = {
               lngLat: {
                 lng: res.mazemap_lon,
@@ -95,14 +100,36 @@ export default {
               zLevel: res.mazemap_z_index
             }
 
-            Mazemap.Data.getRouteJSON(START_POI, dest)
+            // Highlight POI
+            Mazemap.Data.getPoiAt(dest.lngLat, dest.zLevel)
+              .then(poi => {
+                poi.properties.zLevel = MM_ZLVL // Ensure that the highlight is painted regardless of map zLevel
+                this.map.highlighter.highlight(poi)
+              })
+
+            Mazemap.Data.getRouteJSON(start, dest)
               .then(geojson => {
-                this.displayMap = true
                 this.routeController.setPath(geojson)
 
                 // Fit the map bounds to the path bounding box
                 let bounds = Mazemap.Util.Turf.bbox(geojson)
-                this.map.fitBounds(bounds, { padding: 50 })
+                this.map.fitBounds(bounds, {
+                  padding: 100,
+                  duration: 0 // Required for animation to work!
+                })
+
+                // Animate
+                this.animateMap = () => {
+                  this.map.easeTo({
+                    bearing: this.map.getBearing() + 40,
+                    easing: function (t) { return t },
+                    duration: 30000
+                  })
+                }
+                this.animateMap()
+                setInterval(this.animateMap, 30000)
+
+                this.displayMap = true
               })
           })
       } catch (err) {
@@ -120,9 +147,12 @@ export default {
   mounted () {
     this.map = new Mazemap.Map({
       container:     this.$refs.map,
-      campuses:      CAMPUS_ID,
-      center:        CENTER,
-      zoom:          DEFAULT_ZOOM,
+      campuses:      MM_CAMPUS_ID,
+      center:        MM_CENTER_LNGLAT,
+      zoom:          MM_ZOOM,
+      zLevel:        MM_ZLVL,
+      pitch:         48.49,
+      bearing:       0,
       zLevelControl: false
     })
     this.map.on('load', () => {
@@ -130,6 +160,19 @@ export default {
         routeLineColorPrimary: '#27c6da',
         routeLineColorSecondary: '#0197a7'
       })
+      this.map.highlighter = new Mazemap.Highlighter(this.map, {
+        showOutline: true,
+        showFill: true,
+        outlineColor: Mazemap.Util.Colors.MazeColors.MazeGreen,
+        fillColor: Mazemap.Util.Colors.MazeColors.MazeGreen
+      })
+      new Mazemap.BlueDot( {
+        zLevel: MM_ZLVL,
+        accuracyCircle: true,
+        radius: 3,
+        lngLat: MM_CENTER_LNGLAT,
+        fillColor: '#27c6da'
+      }).addTo(this.map)
     })
   }
 }
