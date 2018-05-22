@@ -116,8 +116,10 @@ export default {
             // Highlight POI
             Mazemap.Data.getPoiAt(dest.lngLat, dest.zLevel)
               .then(poi => {
-                poi.properties.zLevel = MM_ZLVL // Ensure that the highlight is painted regardless of map zLevel
-                this.map.highlighter.highlight(poi)
+                if (poi !== false) {
+                  poi.properties.zLevel = MM_ZLVL // Ensure that the highlight is painted regardless of map zLevel
+                  this.map.highlighter.highlight(poi)
+                }
               })
 
             Mazemap.Data.getRouteJSON(start, dest)
