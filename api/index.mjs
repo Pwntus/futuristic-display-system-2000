@@ -170,7 +170,7 @@ app.use(async (req, res, next) => {
 })
 
 Promise.resolve()
-  .then(() => db.open('./database.sqlite', { Promise }))
+  .then(() => db.open('./api/database.sqlite', { Promise })) // Path rel. to PM2 launch file
   .then(() => db.migrate({ force: false }))
   .catch(e => console.error(e.stack))
   .finally(() => app.listen(port))
