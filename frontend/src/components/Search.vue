@@ -49,7 +49,7 @@ export default {
       if (!term || term.length < 2)
         return
 
-      this.subjects = subjects.filter(s => s.toLowerCase().includes(term))
+      this.subjects = subjects.filter(s => s.toLowerCase().includes(term.toLowerCase()))
     }, 500)
   }
 }
