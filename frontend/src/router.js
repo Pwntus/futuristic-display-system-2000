@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import ViewApp from '@/components/ViewApp'
+import ViewSplash from '@/components/ViewSplash'
 import ViewScreen from '@/components/ViewScreen'
 
 Vue.use(Router)
@@ -8,7 +8,7 @@ Vue.use(Router)
 export default new Router({
   mode: 'history',
   routes: [
-    { path: '/', component: ViewApp },
+    { path: '/', component: ViewSplash },
     { path: '/:cid', component: ViewScreen }
   ]
 })

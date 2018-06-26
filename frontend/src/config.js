@@ -1,4 +1,5 @@
-export const API_BASE = 'http://localhost:3002/'
+export const API_ENDPOINT = ''
+export const API_KEY = ''
 export const NAME2POI_BASE = 'https://uit.no/studenter/app/mazemapjson?syllabus_name='
 
 // MazeMap

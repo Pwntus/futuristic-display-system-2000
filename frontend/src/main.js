@@ -1,16 +1,13 @@
+import '@babel/polyfill'
 import Vue from 'vue'
-import VueMaterial from 'vue-material'
-import App from './App.vue'
-import router from './router'
-import store from './store'
-import 'vue-material/dist/vue-material.min.css'
-import 'vue-material/dist/theme/default.css'
+import App from '@/components/App.vue'
+import router from '@/router'
+import '@/global'
 
-Vue.config.productionTip = false
-Vue.use(VueMaterial)
-
+/* eslint-disable no-new */
 new Vue({
+  el: '#app',
   router,
-  store,
-  render: h => h(App)
-}).$mount('#app')
+  template: '<App/>',
+  components: { App }
+})

@@ -1,19 +1,35 @@
 <template lang="pug">
 #view-screen
-  md-progress-spinner.md-accent(
-    v-if="!done"
-    md-mode="indeterminate"
-    :md-diameter="80"
-    :md-stroke="5"
+  v-container(
+    v-if="loading === true"
+    fluid
+    fill-height
   )
-  md-empty-state(
-    v-if="done && curated.length <= 0"
-    md-icon="sentiment_dissatisfied"
-    md-label="No Data"
-    md-description="Please visit http://localhost:8080 and add courses to your card."
+    v-layout(
+      align-center
+      justify-center
+    )
+      v-progress-circular(
+        :size="100"
+        :width="2"
+        indeterminate
+        color="white"
+      )
+  v-container(
+    v-if="loading === false && curated.length <= 0"
+    fluid
+    fill-height
   )
+    v-layout.done(
+      align-center
+      justify-center
+    )
+      div
+        v-icon mood
+        .display-1 No Upcoming Events
+        .title Looks like you are done for today!
   today.today(
-    :class="{ 'show' : done && curated.length > 0 }"
+    v-if="loading === false && curated.length > 0"
     :curated-data="curated"
   )
 </template>
@@ -22,14 +38,17 @@
 import axios from 'axios'
 import moment from 'moment'
 import Today from '@/components/Today'
-import { API_BASE } from '@/config'
+import {
+  API_ENDPOINT,
+  API_KEY
+} from '@/config'
 
 export default {
   name: 'ViewScreen',
   components: { Today },
   data: () => ({
     ics: null,
-    done: false
+    loading: true
   }),
   computed: {
     curated () {
@@ -53,57 +72,45 @@ export default {
       return res
     }
   },
-  mounted () {
-    axios.get(`${API_BASE + this.$route.params.cid}/screen`)
-      .then(res => {
-        this.ics = res.data
-        this.done = true
+  async mounted () {
+    this.loading = true
+    try {
+      const result = await axios.get(`${API_ENDPOINT + this.$route.params.cid}`, {
+        headers: {
+          'X-API-KEY': API_KEY
+        }
       })
-      .catch(err => {
-        this.done = true
-      })
+      this.ics = result.data
+      this.loading = false
+    } catch (e) {
+      console.log(e)
+      this.loading = false
+    }
   }
 }
 </script>
 
-<style lang="scss">
-@import "~vue-material/dist/theme/engine";
-@include md-register-theme("default", (
-  primary: md-get-palette-color(white, 500),
-  accent: md-get-palette-color(white, 500),
-  theme: light
-));
-@import "~vue-material/dist/theme/all";
-
-#view-screen {
-  height: 100%;
-  padding: 15px;
-
-  .md-progress-spinner {
-    top: 50%;
-    left: 50%;
-    margin: -40px 0 0 -40px;
-    position: absolute;
-
-    .md-progress-spinner-circle {
-      stroke: #FFF;
-    }
-  }
-
-  .md-empty-state {
-    top: 50%;
-    left: 50%;
-    margin: -140px 0 0 -210px;
-    position: absolute;
-    color: #FFF;
-  }
-
-  .today {
-    visibility: hidden;
-
-    &.show {
-      visibility: visible;
-    }
-  }
-}
+<style lang="stylus">
+#view-screen
+  height 100%
+  
+  .done
+    top 0
+    left 0
+    margin 0 auto
+    position relative
+    color #01454c
+    text-align center
+    
+    .icon
+      font-size 100px
+    
+    .display-1
+      margin 20px 0
+      
+  .today
+    visibility hidden
+    
+    &.show
+      visibility visible
 </style>
