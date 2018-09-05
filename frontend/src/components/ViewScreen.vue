@@ -29,7 +29,7 @@
         .display-1 No Upcoming Events
         .title Looks like you are done for today!
   today.today(
-    v-if="loading === false && curated.length > 0"
+    :class="{ 'show' : (loading === false && curated.length > 0) }"
     :curated-data="curated"
   )
 </template>

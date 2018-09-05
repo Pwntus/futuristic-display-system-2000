@@ -1,3 +1,4 @@
+import storage from 'node-persist'
 import express from 'express'
 import axios from 'axios'
 import currentWeekNumber from 'current-week-number'
@@ -6,6 +7,9 @@ import * as CONFIG from './config'
 
 const app = express()
 const port = process.env.PORT || 3000
+
+// Init storage
+storage.init()
 
 // Enable CORS
 app.use(async (req, res, next) => {
@@ -46,6 +50,65 @@ const api = async (endpoint, ...params) => {
   }
 }
 
+const get_card_info = async cid => {
+  // Check if card ID is in chache
+  const user_name = await storage.getItem(cid)
+
+  // If cache hit, return
+  if (typeof user_name !== 'undefined')
+    return { user_name }
+
+  // If cache miss, query API
+  const card_info = await api('card_info', cid)
+
+  // Store in cache
+  await storage.setItem(cid, card_info.user_name, { ttl: 31536000000 }) // TTL: 1Y
+
+  return card_info
+}
+
+const get_student_courses = async (cid, user_name) => {
+  // Check if card ID is in chache
+  let module = await storage.getItem(`${cid}-courses`)
+
+  // If cache hit, return
+  if (typeof module !== 'undefined')
+    return module
+
+  // If cache miss, query API
+  const year = (new Date()).getFullYear()
+  const semester = (new Date()).getMonth() > 6 ? 'H' : 'V'
+  const student_courses = await api('student_courses', user_name, year, semester)
+  module = student_courses.emner.map(emne => `${emne.emnekode}-${emne.terminnr}`)
+
+  // Store in cache
+  await storage.setItem(`${cid}-courses`, module, { ttl: 604800000 }) // TTL: 1W
+
+  return module
+}
+
+const get_ics_timeplan = async (cid, module) => {
+  // Check if timeplan in cache
+  let data = await storage.getItem(`${cid}-ics`)
+
+  // If cache hit, return
+  if (typeof data !== 'undefined')
+    return data
+
+  // If cache miss, query API
+  const year = (new Date()).getFullYear()
+  const week = currentWeekNumber()
+  const response = await axios.get('http://timeplan.uit.no/calendar.ics', {
+    params: { module, year, week }
+  })
+  data = response.data
+
+  // Store in cache
+  await storage.setItem(`${cid}-ics`, data, { ttl: 604800000 }) // TTL: 1W
+
+  return data
+}
+
 // Screen data
 app.get('/:cid([0-9]{10})', async (req, res, next) => {
   try {
@@ -53,27 +116,19 @@ app.get('/:cid([0-9]{10})', async (req, res, next) => {
     const cid = req.params.cid
 
     // Get card info
-    const card_info = await api('card_info', cid)
+    const card_info = await get_card_info(cid) // await api('card_info', cid)
 
     // Get student info
-    const student_info = await api('student_info', card_info.user_name)
+    // const student_info = await api('student_info', card_info.user_name)
 
     // Get student courses
-    const year = (new Date()).getFullYear()
-    const semester = (new Date()).getMonth() > 6 ? 'H' : 'V'
-    const student_courses = await api('student_courses', card_info.user_name, year, semester)
+    const module = await get_student_courses(cid, card_info.user_name) // await api('student_courses', card_info.user_name, year, semester)
 
-    // Generate ICS data
-    const module = student_courses.emner.map(emne => `${emne.emnekode}-${emne.terminnr}`)
-    const week = currentWeekNumber()
-
-    // Get ICS
-    const response = await axios.get('http://timeplan.uit.no/calendar.ics', {
-      params: { module, year, week }
-    })
+    // GET ICS from Timeplan
+    const data = await get_ics_timeplan(cid, module)
 
     // Parse ICS
-    ical.parseICS(response.data, (err, data) => {
+    ical.parseICS(data, (err, data) => {
       if (err)
         next(err)
       
