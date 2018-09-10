@@ -91,6 +91,7 @@ export default {
       return item.uid == upcoming.uid ? 'red' : 'blue'
     }
   },
+  /*
   watch: {
     upcoming: function (val) {
       if (val.hasOwnProperty('location')) {
@@ -100,6 +101,7 @@ export default {
       }
     }
   },
+  */
   methods: {
     moment (p) {
       return moment(p)
@@ -198,6 +200,12 @@ export default {
         lngLat: MM_CENTER_LNGLAT,
         fillColor: '#27c6da'
       }).addTo(this.map)
+
+      if (this.upcoming.hasOwnProperty('location')) {
+        this.findRoute(this.upcoming.location)
+      } else {
+        this.empty = true
+      }
     })
   }
 }

@@ -31,6 +31,7 @@ export default {
   top 0
   right 0
   padding 0 40px
-  font-size 90px
+  font-size 60px
   color #FFF
+  z-index 100
 </style>
