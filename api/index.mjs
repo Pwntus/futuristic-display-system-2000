@@ -51,7 +51,7 @@ const api = async (endpoint, ...params) => {
 }
 
 const get_card_info = async cid => {
-  // Check if card ID is in chache
+  // Check if card ID is in cache
   const user_name = await storage.getItem(cid)
 
   // If cache hit, return
@@ -113,16 +113,18 @@ const get_ics_timeplan = async (cid, module) => {
 app.get('/:cid([0-9]{10})', async (req, res, next) => {
   try {
     // Fetch Card ID param
-    const cid = req.params.cid
+    const { cid } = req.params
 
     // Get card info
-    const card_info = await get_card_info(cid) // await api('card_info', cid)
+    // await api('card_info', cid)
+    const card_info = await get_card_info(cid)
 
     // Get student info
     // const student_info = await api('student_info', card_info.user_name)
 
     // Get student courses
-    const module = await get_student_courses(cid, card_info.user_name) // await api('student_courses', card_info.user_name, year, semester)
+    // await api('student_courses', card_info.user_name, year, semester)
+    const module = await get_student_courses(cid, card_info.user_name)
 
     // GET ICS from Timeplan
     const data = await get_ics_timeplan(cid, module)

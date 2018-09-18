@@ -12,10 +12,12 @@
     "moment": "^2.22.1",
     "vue": "^2.5.16",
     "vue-router": "^3.0.1",
-    "vuetify": "^1.0.19"
+    "vuetify": "^1.0.19",
+    "vuex": "^3.0.1"
   },
   "devDependencies": {
     "@babel/polyfill": "^7.0.0-beta.49",
+    "@mdi/font": "^2.7.94",
     "@vue/cli-plugin-babel": "^3.0.0-beta.15",
     "@vue/cli-service": "^3.0.0-beta.15",
     "pug": "^2.0.3",

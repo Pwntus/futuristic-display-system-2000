@@ -27,11 +27,10 @@ export default {
 <style lang="stylus">
 #clock
   position absolute
-  background rgba(255, 255, 255, .15)
   top 0
   right 0
-  padding 0 40px
-  font-size 60px
+  padding-right 10px
+  font-size 70px
   color #FFF
   z-index 100
 </style>

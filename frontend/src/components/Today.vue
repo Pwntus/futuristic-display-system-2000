@@ -38,9 +38,9 @@ v-container#today(
         justify-center
       )
         div
-          v-icon mood
-          .display-1 No Upcoming Events
-          .title Looks like you are done for today!
+          v-icon {{ getDoneIcon() }}
+          .display-2 No Upcoming Events
+          .display-1 Looks like you are done for today!
 </template>
 
 <script>
@@ -91,7 +91,6 @@ export default {
       return item.uid == upcoming.uid ? 'red' : 'blue'
     }
   },
-  /*
   watch: {
     upcoming: function (val) {
       if (val.hasOwnProperty('location')) {
@@ -101,8 +100,29 @@ export default {
       }
     }
   },
-  */
   methods: {
+    getDoneIcon () {
+      const icons = [
+        'mdi-human-handsup',
+        'mdi-linux',
+        'mdi-apple-finder',
+        'mdi-android',
+        'mdi-cake-variant',
+        'mdi-cat',
+        'mdi-emoticon-poop',
+        'mdi-emoticon-tongue',
+        'mdi-github-face',
+        'mdi-guy-fawkes-mask',
+        'mdi-hand-okay',
+        'mdi-hand-peace',
+        'mdi-pirate',
+        'mdi-run',
+        'mdi-star-face',
+        'mdi-sticker-emoji'
+      ]
+      return icons[Math.floor(Math.random() * icons.length)]
+    },
+    // Used in template
     moment (p) {
       return moment(p)
     },
@@ -201,11 +221,8 @@ export default {
         fillColor: '#27c6da'
       }).addTo(this.map)
 
-      if (this.upcoming.hasOwnProperty('location')) {
-        this.findRoute(this.upcoming.location)
-      } else {
-        this.empty = true
-      }
+      // Signal MapBox done loading
+      this.$store.commit('setMapbox', true)
     })
   }
 }
@@ -218,6 +235,7 @@ export default {
 
   .display-2
     margin-bottom 30px
+    font-size 60px
     display block
 
   .events-layout
@@ -285,8 +303,8 @@ export default {
       text-align center
       
       .icon
-        font-size 100px
+        font-size 200px
       
-      .display-1
+      .display-2
         margin 20px 0
 </style>

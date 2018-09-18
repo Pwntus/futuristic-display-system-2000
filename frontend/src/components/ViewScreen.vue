@@ -10,8 +10,8 @@
       justify-center
     )
       v-progress-circular(
-        :size="100"
-        :width="2"
+        :size="200"
+        :width="4"
         indeterminate
         color="white"
       )
@@ -25,9 +25,9 @@
       justify-center
     )
       div
-        v-icon mood
-        .display-1 No Upcoming Events
-        .title Looks like you are done for today!
+        v-icon {{ getDoneIcon() }}
+        .display-2 No Upcoming Events
+        .display-1 Looks like you are done for today!
   today.today(
     :class="{ 'show' : (loading === false && curated.length > 0) }"
     :curated-data="curated"
@@ -37,20 +37,20 @@
 <script>
 import axios from 'axios'
 import moment from 'moment'
+import ical from 'node-ical'
 import Today from '@/components/Today'
-import {
-  API_ENDPOINT,
-  API_KEY
-} from '@/config'
+import { API_ENDPOINT, API_KEY } from '@/config'
 
 export default {
   name: 'ViewScreen',
   components: { Today },
   data: () => ({
     ics: null,
-    loading: true
+    loading: true,
+    queue: false
   }),
   computed: {
+    // Curated ICS list of events for today
     curated () {
       if (this.ics == null)
         return []
@@ -60,9 +60,11 @@ export default {
       for (let i in this.ics) {
         let item = this.ics[i]
 
-        // Filter out only todays events
+        // Filter out non-events
         if (item.type !== 'VEVENT')
           continue
+
+        // Filter out not-today events
         if (moment(item.start).day() !== now.day() || moment(item.end).day() !== now.day())
           continue
 
@@ -72,19 +74,48 @@ export default {
       return res
     }
   },
-  async mounted () {
-    this.loading = true
-    try {
-      const result = await axios.get(`${API_ENDPOINT + this.$route.params.cid}`, {
-        headers: {
-          'X-API-KEY': API_KEY
-        }
-      })
-      this.ics = result.data
-      this.loading = false
-    } catch (e) {
-      console.log(e)
-      this.loading = false
+  watch: {
+    // Watch mapbox 'ready' state (set by Today.vue)
+    '$store.state.mapbox' (value) {
+      // MapBox has signaled ready and we've queued a job
+      if (value === true)
+        this.doJob()
+    }
+  },
+  methods: {
+    async doJob () {
+      this.loading = true
+      try {
+        const { data } = await axios.get(`${API_ENDPOINT + this.$route.params.cid}`, {
+          headers: { 'X-API-KEY': API_KEY }
+        })
+        this.ics = data
+      } catch (e) {
+        console.error(e)
+      } finally {
+        this.loading = false
+      }
+    },
+    getDoneIcon () {
+      const icons = [
+        'mdi-human-handsup',
+        'mdi-linux',
+        'mdi-apple-finder',
+        'mdi-android',
+        'mdi-cake-variant',
+        'mdi-cat',
+        'mdi-emoticon-poop',
+        'mdi-emoticon-tongue',
+        'mdi-github-face',
+        'mdi-guy-fawkes-mask',
+        'mdi-hand-okay',
+        'mdi-hand-peace',
+        'mdi-pirate',
+        'mdi-run',
+        'mdi-star-face',
+        'mdi-sticker-emoji'
+      ]
+      return icons[Math.floor(Math.random() * icons.length)]
     }
   }
 }
@@ -103,9 +134,9 @@ export default {
     text-align center
     
     .icon
-      font-size 100px
+      font-size 200px
     
-    .display-1
+    .display-2
       margin 20px 0
       
   .today

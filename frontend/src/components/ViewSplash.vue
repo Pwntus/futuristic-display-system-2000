@@ -10,8 +10,9 @@
       justify-center
     )
       div
+        .display-2 Where should you be?
         v-icon texture
-        .display-1 Scan Your ID Card
+        .display-2 Scan ID card to find out
 </template>
 
 <script>
@@ -41,8 +42,8 @@ export default {
     text-align center
 
     .icon
-      font-size 100px
+      font-size 200px
 
-    .display-1
+    .display-2
       margin 20px 0
 </style>
