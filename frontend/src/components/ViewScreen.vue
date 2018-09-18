@@ -46,8 +46,7 @@ export default {
   components: { Today },
   data: () => ({
     ics: null,
-    loading: true,
-    queue: false
+    loading: true
   }),
   computed: {
     // Curated ICS list of events for today
