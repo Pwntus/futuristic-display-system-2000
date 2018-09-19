@@ -1,9 +1,10 @@
 const { NFC } = require('nfc-pcsc')
 const io = require('socket.io')(3022)
+const CONFIG = require('./config')
 const nfc = new NFC()
 
-const KEY_A = ''
-const KEY_B = ''
+const KEY_A = CONFIG.KEY_A
+const KEY_B = CONFIG.KEY_B
 const KEY_TYPE_A = 0x60
 const KEY_TYPE_B = 0x61
 

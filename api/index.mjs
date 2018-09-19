@@ -55,8 +55,10 @@ const get_card_info = async cid => {
   const user_name = await storage.getItem(cid)
 
   // If cache hit, return
-  if (typeof user_name !== 'undefined')
+  if (typeof user_name !== 'undefined') {
+    console.log('Uname HIT!')
     return { user_name }
+  }
 
   // If cache miss, query API
   const card_info = await api('card_info', cid)
@@ -72,8 +74,10 @@ const get_student_courses = async (cid, user_name) => {
   let module = await storage.getItem(`${cid}-courses`)
 
   // If cache hit, return
-  if (typeof module !== 'undefined')
+  if (typeof module !== 'undefined') {
+    console.log('Module HIT!')
     return module
+  }
 
   // If cache miss, query API
   const year = (new Date()).getFullYear()
@@ -92,8 +96,10 @@ const get_ics_timeplan = async (cid, module) => {
   let data = await storage.getItem(`${cid}-ics`)
 
   // If cache hit, return
-  if (typeof data !== 'undefined')
+  if (typeof data !== 'undefined') {
+    console.log('TP HIT!')
     return data
+  }
 
   // If cache miss, query API
   const year = (new Date()).getFullYear()

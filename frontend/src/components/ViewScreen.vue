@@ -36,8 +36,7 @@
 
 <script>
 import axios from 'axios'
-import moment from 'moment'
-import ical from 'node-ical'
+import moment from 'moment-timezone'
 import Today from '@/components/Today'
 import { API_ENDPOINT, API_KEY } from '@/config'
 

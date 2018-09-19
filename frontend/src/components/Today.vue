@@ -45,7 +45,7 @@ v-container#today(
 
 <script>
 import axios from 'axios'
-import moment from 'moment'
+import moment from 'moment-timezone'
 import {
   NAME2POI_BASE,
   MM_CAMPUS_ID,
@@ -145,11 +145,14 @@ export default {
               zLevel: res.mazemap_z_index
             }
 
+            // Set map zLevel to destination zLevel
+            this.map.setZLevel(dest.zLevel)
+
             // Highlight POI
             Mazemap.Data.getPoiAt(dest.lngLat, dest.zLevel)
               .then(poi => {
                 if (poi !== false) {
-                  poi.properties.zLevel = MM_ZLVL // Ensure that the highlight is painted regardless of map zLevel
+                  // poi.properties.zLevel = dest.zLevel
                   this.map.highlighter.highlight(poi)
                 }
               })
